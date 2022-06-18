@@ -1,0 +1,20 @@
+name: 'Git Last Tag'
+author: Rick Meneely <rick@meneely.com>
+branding:
+  icon: chevrons-left
+  color: purple
+description: Find and return the most recent matching tag
+inputs:
+  tag_pattern:
+    description: The tag pattern to match
+    default: 'v[0-9]*.[0-9]*.[0-9]*'
+    required: false
+outputs:
+  last_tag:
+    description: 'Sets the env.LAST_TAG to the most recent matching tag'
+    value: ${{ steps.get-last-tag.outputs.last_tag }}
+runs:
+  using: "composite"
+  steps:
+    - run: last_tag.sh
+      shell: bash
