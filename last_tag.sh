@@ -59,7 +59,7 @@ function main() { # main function
   # Output the versions
   if [ "${GITHUB_ENV}" !=  '' ]; then
      echo "LAST_TAG=${LAST_TAG}" >> $GITHUB_ENV
-     echo "::set-output name=last_tag::${LAST_TAG}"
+     echo "last_tag=${LAST_TAG}" >> $GITHUB_OUTPUT
   else
      echo "LAST_TAG=${LAST_TAG}"
   fi
