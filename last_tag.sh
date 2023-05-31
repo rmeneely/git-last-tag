@@ -1,10 +1,11 @@
 #!/bin/bash
 # Description: Utility to return the most recent matching tag
 program=`basename $0`
-Syntax='$program [-t <tag pattern>]'
+Syntax='$program [-t <tag pattern>] [-i <ignore tag pattern>] [-h]'
 set -e
 
 # Defaults
+export IGNORE_TAG_PATTERN="${INPUT_IGNORE_TAG_PATTERN:-''}"
 export TAG_PATTERN="${INPUT_TAG_PATTERN:-'v[0-9]*.[0-9]*.[0-9]*'}"
 
 # Add this git workspace as a safe directory
@@ -14,13 +15,16 @@ if [ "${GITHUB_WORKSPACE}" !=  '' ]; then
 fi
 
 # Get command line arguments
-while getopts "t:h" option; do
+while getopts "i:t:h" option; do
   case $option in
+    i) # Ignore Tag pattern
+       IGNORE_TAG_PATTERN=$OPTARG ;;
     t) # Tag pattern
        TAG_PATTERN=$OPTARG ;;
     h) # Help
        echo "Syntax: ${Syntax}"
        echo "Defaults:"
+       echo "Ignore Tag Pattern: ${IGNORE_TAG_PATTERN}"
        echo "Tag Pattern: ${TAG_PATTERN}"
        exit 0
        ;;
@@ -33,29 +37,33 @@ while getopts "t:h" option; do
 done
 
 display_options() {
+  echo "IGNORE_TAG_PATTERN=$IGNORE_TAG_PATTERN"
   echo "TAG_PATTERN=$TAG_PATTERN"
   echo ""
 }
 
 sanitize_parameters() {
   # Cleanup of input parameter format
+  IGNORE_TAG_PATTERN=`echo "$IGNORE_TAG_PATTERN" | sed -e "s/^'//" -e "s/'$//"`
+  IGNORE_TAG_PATTERN="'$IGNORE_TAG_PATTERN'"
   TAG_PATTERN=`echo "$TAG_PATTERN" | sed -e "s/^'//" -e "s/'$//"`
   TAG_PATTERN="'$TAG_PATTERN'"
 }
 
 function get_last_tag() { # Get most recent matching tag
   pattern="${1:-${TAG_PATTERN}}"
+  ignore_pattern="${2:-${IGNORE_TAG_PATTERN}}"
   git fetch --tags
-  cmd="git tag --sort=committerdate --list ${pattern} | tail -1"
+  cmd="git tag --sort=committerdate --list ${pattern} | egrep -v "^${ignore_pattern}\$" | tail -1"
   eval $cmd
 }
 
 function main() { # main function
   sanitize_parameters
 
-  # Get the last tag 
+  # Get the last tag
   LAST_TAG=`get_last_tag "${TAG_PATTERN}"`
-  
+
   # Output the versions
   if [ "${GITHUB_ENV}" !=  '' ]; then
      echo "LAST_TAG=${LAST_TAG}" >> $GITHUB_ENV
