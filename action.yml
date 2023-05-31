@@ -22,5 +22,5 @@ runs:
   steps:
     - run: echo "${{ github.action_path }}" >> $GITHUB_PATH
       shell: bash
-    - run: last_tag.sh -t ${{ inputs.tag_pattern }} -i ${{ inputs.ignore_tag_pattern }}
+    - run: last_tag.sh -t "${{ inputs.tag_pattern }}" -i "${{ inputs.ignore_tag_pattern }}"
       shell: bash
