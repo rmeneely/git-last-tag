@@ -54,7 +54,7 @@ function get_last_tag() { # Get most recent matching tag
   pattern="${1:-${TAG_PATTERN}}"
   ignore_pattern="${2:-${IGNORE_TAG_PATTERN}}"
   git fetch --tags
-  cmd="git tag --sort=committerdate --list ${pattern} | egrep -v "^${ignore_pattern}\$" | tail -1"
+  cmd="git tag --sort=creatordate --list ${pattern} | egrep -v "^${ignore_pattern}\$" | tail -1"
   eval $cmd
 }
 
